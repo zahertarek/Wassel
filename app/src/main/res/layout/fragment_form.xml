@@ -1,0 +1,274 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:background="#e7e7e7">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.guc.wasel.Form"
+
+    android:orientation="vertical"
+    >
+    <LinearLayout
+        android:padding="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+
+            android:textColor="#000"
+            android:textSize="8pt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Point Of Intrest Name" />
+
+        <EditText
+            android:textSize="6pt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="eg. Vodafone,KFC,...etc"
+            android:id="@+id/poi_name"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:padding="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:weightSum="3"
+        >
+        <TextView
+            android:textColor="#000"
+            android:textSize="8pt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Point of Intrest Type:-"
+            />
+        <AutoCompleteTextView
+            android:id="@+id/autocomplete_types"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:completionThreshold="1"
+            />
+    </LinearLayout>
+<LinearLayout
+    android:id="@+id/linear_layout"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+</LinearLayout>
+
+
+    <LinearLayout
+        android:padding="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:weightSum="3"
+        >
+        <TextView
+            android:textColor="#000"
+            android:textSize="8pt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Accessibilty:-"
+            />
+
+        <CheckBox
+            android:textColor="#E91E63"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Accessible Parking"
+            android:id="@+id/accessible_parking_checkbox" />
+        <EditText
+            android:id="@+id/accessible_parking_edittext"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="10dp"
+            android:hint="Please ellaborate more"
+            android:visibility="gone"
+            />
+
+        <CheckBox
+            android:textColor="#E91E63"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Step Free Entrance"
+            android:id="@+id/step_free_entrance_checkbox" />
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="10dp"
+            android:hint="Please ellaborate more"
+            android:visibility="gone"
+            android:id="@+id/step_free_entrance_edittext"
+            />
+
+        <CheckBox
+            android:textColor="#E91E63"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Wide Doors"
+            android:id="@+id/wide_doors_checkbox"
+            />
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="10dp"
+            android:hint="Please ellaborate more"
+            android:visibility="gone"
+            android:id="@+id/wide_doors_edittext"
+            />
+
+        <CheckBox
+            android:textColor="#E91E63"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Primary Functions"
+            android:id="@+id/primary_functions_checkbox"
+            />
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="10dp"
+            android:hint="Please ellaborate more"
+            android:visibility="gone"
+            android:id="@+id/primary_functions_edittext"
+            />
+
+        <CheckBox
+            android:textColor="#E91E63"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="WheelChair Restrooms"
+            android:id="@+id/wheel_chair_restrooms_box"
+            />
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="10dp"
+            android:hint="Please ellaborate more"
+            android:visibility="gone"
+            android:id="@+id/wheel_chair_restrooms_edittext"
+            />
+
+        <CheckBox
+            android:textColor="#E91E63"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="In Room Accessbility"
+            android:id="@+id/inRoom_accessbility_checkbox"
+            />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="10dp"
+            android:hint="Please ellaborate more"
+            android:visibility="gone"
+            android:id="@+id/in_room_edittext"
+            />
+
+        <CheckBox
+            android:textColor="#E91E63"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Roll In Shower"
+            android:id="@+id/roll_in_shower_checkbox"
+            />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="10dp"
+            android:hint="Please ellaborate more"
+            android:visibility="gone"
+            android:id="@+id/roll_in_shower_edittext"
+            />
+        <CheckBox
+        android:textColor="#E91E63"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Braille Menu"
+        android:id="@+id/braille_menu_checkbox"
+        />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="10dp"
+            android:hint="Please ellaborate more"
+            android:visibility="gone"
+            android:id="@+id/braille_menu_edittext"
+            />
+
+        <CheckBox
+            android:textColor="#E91E63"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Sign Language"
+            android:id="@+id/sign_language_checkbox"
+            />
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="10dp"
+            android:hint="Please ellaborate more"
+            android:visibility="gone"
+            android:id="@+id/sign_language_edittext"
+            />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Overall Accessibility:- "
+        android:textColor="#000"
+        android:textSize="8pt"
+        />
+    <RadioGroup
+        android:id="@+id/radio_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <RadioButton
+            android:id="@+id/radio_low"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="LOW"
+            android:textColor="#E91E63"/>
+        <RadioButton
+            android:id="@+id/radio_medium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="MEDIUM"
+            android:textColor="#E91E63"/>
+        <RadioButton
+            android:id="@+id/radio_high"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="HIGH"
+            android:textColor="#E91E63"/>
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/location_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Set Location"
+    />
+
+
+</LinearLayout>
+</ScrollView>
