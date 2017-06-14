@@ -1,5 +1,6 @@
 package com.guc.wasel;
 
+
 /**
  * Created by Zaher Abdelrahman on 4/21/2017.
  */
@@ -32,9 +33,9 @@ import java.util.ArrayList;
 import java.util.Map;
 
 /**
- * This Class defines the AddGateMapActivity, this activity is used to allow users to add gates to a specific point of interest, The user can define whether this gate is accessible or not
+ * This Class defines the AddParkingMapActivity, this activity is used to allow users to add Parkings to a specific point of interest, The user can define whether this Parking is accessible or not
  */
-public class AddGateMapActivity extends AppCompatActivity implements OnMapReadyCallback,GoogleMap.OnInfoWindowClickListener{
+public class AddParkingActivity extends AppCompatActivity implements OnMapReadyCallback,GoogleMap.OnInfoWindowClickListener{
 
     private GoogleMap mMap;
     private Marker marker;
@@ -43,7 +44,7 @@ public class AddGateMapActivity extends AppCompatActivity implements OnMapReadyC
     private String id;
     private double latitude;
     private double longitude;
-    ArrayList<Gate> gates;
+    ArrayList<Parking> parkings;
     private Switch isAccessibleSwitch;
     private AlertDialog alertDialog;
 
@@ -55,17 +56,18 @@ public class AddGateMapActivity extends AppCompatActivity implements OnMapReadyC
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_gate_map);
+        setContentView(R.layout.activity_add_parking);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        id = (String) getIntent().getStringExtra("id");
 
         declareActivityViews();
 
         setButtonListener();
 
-
     }
+
 
 
     /**
@@ -79,7 +81,7 @@ public class AddGateMapActivity extends AppCompatActivity implements OnMapReadyC
 
 
 
-        loadGates();
+        loadParkings();
 
 
 
@@ -97,45 +99,45 @@ public class AddGateMapActivity extends AppCompatActivity implements OnMapReadyC
     }
 
     /**
-     * This function is called when a info window of a marker on the map is clicked, the gate referred by this marker is removed from the database
+     * This function is called when a info window of a marker on the map is clicked, the Parking referred by this marker is removed from the database
      * @param marker the clicked marker object
      */
     @Override
     public void onInfoWindowClick(Marker marker) {
-        gates.remove(Integer.parseInt((String) marker.getTag()));
+        parkings.remove(Integer.parseInt((String) marker.getTag()));
         marker.remove();
-        FirebaseDatabase.getInstance().getReference().child("poi").child(id).child("gates").setValue(gates);
+        FirebaseDatabase.getInstance().getReference().child("poi").child(id).child("parkings").setValue(parkings);
 
 
 
     }
 
     /**
-     * This method connect to the realtime database of Firebase and load all gates of the point of interest.
+     * This method connect to the realtime database of Firebase and load all Parkings of the point of interest.
      */
-    public void loadGates(){
+    public void loadParkings(){
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("poi").child(id);
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Map poiEntry = (Map) dataSnapshot.getValue();
-                gates = (ArrayList) poiEntry.get("gates");
+                parkings = (ArrayList) poiEntry.get("parkings");
                 longitude = (double) poiEntry.get("longitude");
                 latitude = (double) poiEntry.get("latitude");
                 LatLng latLng = new LatLng(latitude,longitude);
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
                 marker.setPosition(latLng);
-                Marker markerGate = mMap.addMarker(new MarkerOptions().position(latLng).
+                Marker markerParking= mMap.addMarker(new MarkerOptions().position(latLng).
                         title((String) poiEntry.get("name")).
                         icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)));
-                if(gates != null)
-                    for(int i=0;i<gates.size();i++){
-                        Map gate =(Map) gates.get(i);
-                        double longitude =(double) gate.get("longitude");
-                        double latitude = (double) gate.get("latitude");
+                if(parkings != null)
+                    for(int i=0;i<parkings.size();i++){
+                        Map parking =(Map) parkings.get(i);
+                        double longitude =(double) parking.get("longitude");
+                        double latitude = (double) parking.get("latitude");
                         Marker m = mMap.addMarker(new MarkerOptions().position( new LatLng(latitude,longitude)).title("Tap Here to Remove").
-                                icon(BitmapDescriptorFactory.fromResource(R.drawable.exit)));
+                                icon(BitmapDescriptorFactory.fromResource(R.drawable.parking)));
                         m.setTag(""+i);
                     }
             }
@@ -149,27 +151,27 @@ public class AddGateMapActivity extends AppCompatActivity implements OnMapReadyC
     }
 
     /**
-     * Build and returns an alertdialog that asks the user if he is sure to add a new gate or not.
+     * Build and returns an alertdialog that asks the user if he is sure to add a new Parking or not.
      * @return The Alert dialogue Built
      */
-    private  AlertDialog buildGateDialog(){
-        AlertDialog.Builder builder = new AlertDialog.Builder(AddGateMapActivity.this);
-        builder.setTitle("Gate Confirmation");
-        builder.setMessage("Are you sure you want to add a gate at this location");
-        builder.setPositiveButton("Add Gate", new DialogInterface.OnClickListener() {
+    private  AlertDialog buildParkingDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(AddParkingActivity.this);
+        builder.setTitle("Parking Confirmation");
+        builder.setMessage("Are you sure you want to add a parking at this location");
+        builder.setPositiveButton("Add Parking", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 LatLng latLng = marker.getPosition();
-                Gate gate = new Gate();
-                gate.setAccessible(true);
-                gate.setLatitude(latLng.latitude);
-                gate.setLongitude(latLng.longitude);
-                gate.setAccessible(isAccessibleSwitch.isChecked());
-                if(gates == null){
-                    gates = new ArrayList<Gate>();
+                Parking parking = new Parking();
+                parking.setAccessible(true);
+                parking.setLatitude(latLng.latitude);
+                parking.setLongitude(latLng.longitude);
+                parking.setAccessible(isAccessibleSwitch.isChecked());
+                if(parkings == null){
+                    parkings = new ArrayList<Parking>();
                 }
-                gates.add(gate);
-                FirebaseDatabase.getInstance().getReference().child("poi").child(id).child("gates").setValue(gates);
+                parkings.add(parking);
+                FirebaseDatabase.getInstance().getReference().child("poi").child(id).child("parkings").setValue(parkings);
                 finish();
             }
         });
@@ -187,15 +189,14 @@ public class AddGateMapActivity extends AppCompatActivity implements OnMapReadyC
      * This method is responsible of declaring the views instant variables of this Activity to their corresponding view in the layout files, using findViewById() method.
      */
     private void declareActivityViews(){
-        id = (String) getIntent().getStringExtra("id");
-        button = (Button) findViewById(R.id.gate_location_submit);
-        abortButton = (Button) findViewById(R.id.gate_location_abort);
-        isAccessibleSwitch = (Switch) findViewById(R.id.gate_switch) ;
-        alertDialog = buildGateDialog();
+        button = (Button) findViewById(R.id.parking_location_submit);
+        abortButton = (Button) findViewById(R.id.parking_location_abort);
+        isAccessibleSwitch = (Switch) findViewById(R.id.parking_switch) ;
+        alertDialog = buildParkingDialog();
     }
 
     /**
-     * This function set the listeners of the Save and Abort Buttons, Save Button add a new gate, Abort Button close the Activity.
+     * This function set the listeners of the Save and Abort Buttons, Save Button add a new Parking, Abort Button close the Activity.
      */
     private void setButtonListener(){
         button.setOnClickListener(new View.OnClickListener() {
@@ -208,8 +209,9 @@ public class AddGateMapActivity extends AppCompatActivity implements OnMapReadyC
         abortButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AddGateMapActivity.this.finish();
+                AddParkingActivity.this.finish();
             }
         });
     }
+
 }

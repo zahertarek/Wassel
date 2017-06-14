@@ -9,7 +9,9 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:screenOrientation="portrait"
+        >
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -22,6 +24,9 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
 
         <activity
             android:name=".MainActivity"
@@ -30,6 +35,13 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <data
+                    android:host="wasel.com"
+                    android:scheme="http" />
+
+                <action android:name="android.intent.action.VIEW" />
             </intent-filter>
         </activity>
         <activity
@@ -40,7 +52,9 @@
         <activity android:name=".AddGateMapActivity" />
         <activity android:name=".signUpActivity" />
         <activity android:name=".MapsActivity" />
-        <activity android:name=".ForgetPasswordActivity"></activity>
+        <activity android:name=".ForgetPasswordActivity" />
+        <activity android:name=".AddRestroomActivity" />
+        <activity android:name=".AddParkingActivity"></activity>
     </application>
 
 </manifest>

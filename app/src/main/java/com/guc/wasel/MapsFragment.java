@@ -4,6 +4,7 @@ package com.guc.wasel;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
@@ -51,7 +52,7 @@ import java.util.Map;
 import static android.content.Context.LOCATION_SERVICE;
 
 /**
- * A simple {@link Fragment} subclass.
+ * This class defines the MapsFragment, where the user can surf the world maps and th tagged POIs
  */
 public class MapsFragment extends Fragment implements OnMapReadyCallback,GoogleMap.OnInfoWindowClickListener,LocationListener{
 
@@ -60,6 +61,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,GoogleM
     private Location myLocation;
     private PlaceAutocompleteFragment placeAutocompleteFragment;
     private ProgressDialog progressDialog;
+    SupportMapFragment mapFragment;
 
     public MapsFragment() {
         // Required empty public constructor
@@ -77,6 +79,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,GoogleM
 
     }
 
+    /**
+     * This method is executed when the user change his location so the search results are ajdusted based on the current location
+     * @param location the current location of the user
+     */
     @Override
     public void onLocationChanged(Location location) {
         placeAutocompleteFragment.setBoundsBias(new LatLngBounds(new LatLng(location.getLatitude(),location.getLongitude()),new LatLng(location.getLatitude(),location.getLongitude())));
@@ -85,7 +91,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,GoogleM
     @Override
     public void onStart() {
         super.onStart();
-        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync((OnMapReadyCallback) this);
 
         placeAutocompleteFragment = (PlaceAutocompleteFragment)getActivity().getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
@@ -93,7 +99,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,GoogleM
         placeAutocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
-                mMap.animateCamera(CameraUpdateFactory.newLatLng(place.getLatLng()));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(),15));
+
 
             }
 
@@ -111,8 +118,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,GoogleM
     @Override
     public void onResume() {
         super.onResume();
-        progressDialog.show();
-        loadPois();
+
     }
 
 
@@ -132,6 +138,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,GoogleM
             getActivity().getFragmentManager().beginTransaction().remove(placeAutocompleteFragment).commit();
     }
 
+    /**
+     * This method adjust the initial camera location
+     */
     public void adjustCameraLocation() {
         LocationManager locationManager = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
 
@@ -175,6 +184,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,GoogleM
         }
     }
 
+    /**
+     * This method is executed when the map is ready to load pois, add markers, setting its listeners
+     * @param googleMap Google Maps Object
+     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -193,7 +206,12 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,GoogleM
 
     }
 
-
+    /**
+     * This function behaves based on the user response on the permission request
+     * @param requestCode
+     * @param permissions
+     * @param grantResults
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
@@ -209,9 +227,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,GoogleM
 }
 
 
-
-
-
+    /**
+     * This method connects to the Database to load POIs and show it on the map
+     */
     private void loadPois(){
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("poi");
         ref.addValueEventListener(
@@ -228,16 +246,24 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,GoogleM
                             LatLng latLng = new LatLng((Double) poiEntry.get("latitude"),(Double)poiEntry.get("longitude"));
 
                             if(isVerified) {
+                                String accessibilityLevel = (String) poiEntry.get("accessbilityLevel");
+                                float color;
+                                if(accessibilityLevel.equals("HIGH"))
+                                    color = BitmapDescriptorFactory.HUE_GREEN;
+                                else if(accessibilityLevel.equals("MEDIUM"))
+                                    color = BitmapDescriptorFactory.HUE_ORANGE;
+                                else
+                                    color=BitmapDescriptorFactory.HUE_RED;
                                 Marker marker = mMap.addMarker(new MarkerOptions().position(latLng).
                                         title((String) poiEntry.get("name")).
                                         snippet("Click Here For More Info").
-                                        icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                                        icon(BitmapDescriptorFactory.defaultMarker(color)));
                                 marker.setTag(poi.getKey());
                             }else if( !isVerified && MainActivity.isAdmin() ){
                                 Marker marker = mMap.addMarker(new MarkerOptions().position(latLng).
                                         title((String) poiEntry.get("name")).
                                         snippet("Click Here For More Info").
-                                        icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                                        icon(BitmapDescriptorFactory.fromResource(R.drawable.question)));
                                 marker.setTag(poi.getKey());
                             }
                         }
@@ -252,6 +278,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,GoogleM
         );
     }
 
+    /**
+    * This function is called when a info window of a marker on the map is clicked, The POI referred by this marker is opened
+    * @param marker the clicked marker object
+    */
     @Override
     public void onInfoWindowClick(Marker marker) {
         final String poiId =(String) marker.getTag();
@@ -274,6 +304,26 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,GoogleM
                 poi.setWheelchairRestrooms((boolean) poiEntry.get("wheelchairRestrooms"));
                 poi.setWideDoorsAvailable((boolean) poiEntry.get("wideDoorsAvailable"));
                 poi.setVerified((boolean) poiEntry.get("verified"));
+                poi.setAccessibileParkingText((String)poiEntry.get("accessibileParkingText"));
+                poi.setStepFreeEntranceText((String)poiEntry.get("stepFreeEntranceText"));
+                poi.setWideDoorsAvailableText((String)poiEntry.get("wideDoorsAvailableText"));
+                poi.setPrimaryFunctionsAvailableText((String)poiEntry.get("primaryFunctionsAvailableText"));
+                poi.setWheelchairRestroomsText((String)poiEntry.get("wheelchairRestroomsText"));
+                poi.setInRoomAccessibilityText((String)poiEntry.get("inRoomAccessibilityText"));
+                poi.setRollInShowerText((String)poiEntry.get("rollInShowerText"));
+                poi.setBrailleMenuText((String)poiEntry.get("brailleMenuText"));
+                poi.setSignLanguageText((String)poiEntry.get("signLanguageText"));
+
+
+                String al = (String) poiEntry.get("accessbilityLevel");
+                if(al.equals("HIGH"))
+                    poi.setAccessbilityLevel(AccessibilityLevel.HIGH);
+                else if(al.equals("MEDIUM"))
+                        poi.setAccessbilityLevel(AccessibilityLevel.MEDIUM);
+                else
+                    poi.setAccessbilityLevel(AccessibilityLevel.LOW);
+
+
 
                 Intent intent = new Intent(getActivity(),PoiActivity.class);
                 intent.putExtra("POI",poi);

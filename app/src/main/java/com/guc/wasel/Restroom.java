@@ -1,17 +1,18 @@
 package com.guc.wasel;
 
 /**
- * Created by New on 3/26/2017.
+ * Created by Zaher Abdelrahman on 4/27/2017.
  */
 
 /**
- * This class define the gate model
+ * This Class defines the Restroom Model
  */
-public class Gate {
+public class Restroom {
 
     private boolean isAccessible;
     private double longitude;
     private double latitude;
+
 
     public double getLatitude() {
         return latitude;
@@ -36,5 +37,7 @@ public class Gate {
     public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
+
+
 
 }

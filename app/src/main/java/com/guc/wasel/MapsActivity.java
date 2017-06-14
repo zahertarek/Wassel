@@ -1,5 +1,6 @@
 package com.guc.wasel;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -7,11 +8,15 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -21,20 +26,33 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.mikepenz.materialdrawer.AccountHeader;
+import com.mikepenz.materialdrawer.AccountHeaderBuilder;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
+import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 
 import java.util.ArrayList;
 
+/**
+ * This class defines the MapsActivity.
+ */
 public class MapsActivity extends FragmentActivity{
 
-    private DrawerLayout mDrawerLayout;
-    private ListView mDrawerList;
+
     private ArrayAdapter<String> drawerListAdapter;
+    private ActionBarDrawerToggle drawerToggle;
     private Form form;
     private MapsFragment mapsFragment;
     static int state = 0;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
-
+    private Button sideButton;
+    private String name;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +62,76 @@ public class MapsActivity extends FragmentActivity{
 
 
 
+        checkUserStatus();
+
+
+        form = new Form();
+        mapsFragment = new MapsFragment();
+
+
+        final Drawer drawer = buildSideDrawer();
+
+        sideButton = (Button) findViewById(R.id.side_button);
+
+        sideButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+               drawer.openDrawer();
+            }
+        });
+
+
+    }
+
+
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        if(state == 0)
+            fragmentManager.beginTransaction().replace(R.id.content_frame, mapsFragment).commit();
+        else
+            fragmentManager.beginTransaction().replace(R.id.content_frame, form).commit();
+    }
+
+    @Override
+    public void onBackPressed() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
+        builder.setTitle("Exit");
+        builder.setMessage("Are you sure you want to exit ?");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Intent intent = new Intent(getBaseContext(), MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putExtra("Exit me", true);
+                startActivity(intent);
+                finish();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+
+        builder.create().show();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mAuth.removeAuthStateListener(mAuthListener);
+    }
+
+    /**
+     * This method check the current status of the user, if he is not logged in the application is redirected to the MainActivity, if he is logged in the isAdmin Static variable is set based on the correct value.
+     */
+    private void checkUserStatus(){
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -79,65 +167,44 @@ public class MapsActivity extends FragmentActivity{
 
             }
         };
+    }
 
-
-        form = new Form();
-        mapsFragment = new MapsFragment();
-
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerList = (ListView) findViewById(R.id.left_drawer);
-        drawerListAdapter = new ArrayAdapter<String>(this, R.layout.drawer_list_item);
-        drawerListAdapter.add("Form");
-        drawerListAdapter.add("Maps");
-        drawerListAdapter.add("sign out");
-
-        drawerListAdapter.notifyDataSetChanged();
-
-        mDrawerList.setAdapter(drawerListAdapter);
-
-        mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+    /**
+     * This Method initialize the navigation bar, assigns its listeners so the user can navigate inside the application.
+     * @return Side Navigation Bar
+     */
+    private Drawer buildSideDrawer(){
+        PrimaryDrawerItem addPoiItem = new PrimaryDrawerItem().withIdentifier(1).withName("Add Point of Interest");
+        PrimaryDrawerItem mapsItem   = new PrimaryDrawerItem().withIdentifier(2).withName("Maps");
+        PrimaryDrawerItem signOutItem  = new PrimaryDrawerItem().withIdentifier(3).withName("Sign out");
+        final Drawer drawer =  new DrawerBuilder().withActivity(this).addDrawerItems(addPoiItem,mapsItem,signOutItem).build();
+        drawer.setSelectionAtPosition(1);
+        drawer.setOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                if (i == 0) {
+            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                if (position == 0) {
                     FragmentManager fragmentManager = getSupportFragmentManager();
                     fragmentManager.beginTransaction().replace(R.id.content_frame, form).commit();
-                    mDrawerLayout.closeDrawer(Gravity.LEFT,true);
                     state=1;
-                } else if(i==1) {
+                    drawer.closeDrawer();
+                    return true;
+                } else if(position==1) {
                     FragmentManager fragmentManager = getSupportFragmentManager();
                     fragmentManager.beginTransaction().replace(R.id.content_frame, mapsFragment).commit();
-                    mDrawerLayout.closeDrawer(Gravity.LEFT,true);
                     state=0;
+                    drawer.closeDrawer();
+                    return true;
+
                 }else{
                     MainActivity.setIsAdmin(false);
                     mAuth.signOut();
+                    drawer.closeDrawer();
+                    return true;
                 }
+
             }
         });
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mAuth.addAuthStateListener(mAuthListener);
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        if(state == 0)
-            fragmentManager.beginTransaction().replace(R.id.content_frame, mapsFragment).commit();
-        else
-            fragmentManager.beginTransaction().replace(R.id.content_frame, form).commit();
-    }
-
-    @Override
-    public void onBackPressed() {
-
-    }
-
-
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        mAuth.removeAuthStateListener(mAuthListener);
+        return drawer;
     }
 }
 

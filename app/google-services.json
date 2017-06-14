@@ -1,35 +1,27 @@
 {
   "project_info": {
-    "project_number": "515259703777",
-    "firebase_url": "https://metal-force-158615.firebaseio.com",
-    "project_id": "metal-force-158615",
-    "storage_bucket": "metal-force-158615.appspot.com"
+    "project_number": "987979195121",
+    "firebase_url": "https://wasel-5c368.firebaseio.com",
+    "project_id": "wasel-5c368",
+    "storage_bucket": "wasel-5c368.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:515259703777:android:3b06d3d7e5495814",
+        "mobilesdk_app_id": "1:987979195121:android:3b06d3d7e5495814",
         "android_client_info": {
           "package_name": "com.guc.wasel"
         }
       },
       "oauth_client": [
         {
-          "client_id": "515259703777-31kmpt8t08ssps90j3uch4a7p6cmv3n5.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.guc.wasel",
-            "certificate_hash": "24cf2c0306eb00e1e4e07f73602b4837cbcf8a45"
-          }
-        },
-        {
-          "client_id": "515259703777-r8bvdgd0mah85s35j9rh4222hm6nftvk.apps.googleusercontent.com",
+          "client_id": "987979195121-vmb0g35efb4tqorlhomsb03n6o9fch4v.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCvvu1zork_Jr2axqvOPOq9VU3-cseDs4U"
+          "current_key": "AIzaSyCgsBShmOM371hDgy1UzOaD0FhJ1VOf7CA"
         }
       ],
       "services": {
@@ -37,13 +29,8 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 2,
-          "other_platform_oauth_client": [
-            {
-              "client_id": "515259703777-r8bvdgd0mah85s35j9rh4222hm6nftvk.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "status": 1,
+          "other_platform_oauth_client": []
         },
         "ads_service": {
           "status": 2

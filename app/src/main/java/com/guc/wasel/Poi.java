@@ -10,9 +10,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
- * Created by New on 2/27/2017.
+ * Created by Zaher Acdelrahman on 2/27/2017.
  */
 
+/**
+ * This class defines the point of interest model.
+ */
 public class Poi implements Serializable {
 
 
@@ -38,11 +41,16 @@ public class Poi implements Serializable {
     private boolean signLanguage;
     private String signLanguageText;
     private ArrayList<Gate> gates;
+    private ArrayList<Restroom> restrooms;
+    private ArrayList<Parking> parkings;
     private AccessibilityLevel accessbilityLevel;
     private ArrayList<Integer> category;
     private boolean isVerified;
 
-
+    /**
+     * This method returns if this POI is verified or not
+     * @return boolean
+     */
     public boolean isVerified(){
         return isVerified;
     }
@@ -145,7 +153,14 @@ public class Poi implements Serializable {
     public Poi(){
 
     }
-    
+
+    public ArrayList<Restroom> getRestrooms() {
+        return restrooms;
+    }
+
+    public void setRestrooms(ArrayList<Restroom> restrooms) {
+        this.restrooms = restrooms;
+    }
 
     public boolean isSignLanguage() {
         return signLanguage;
@@ -251,6 +266,17 @@ public class Poi implements Serializable {
         this.category = category;
     }
 
+    public ArrayList<Parking> getParkings() {
+        return parkings;
+    }
+
+    public void setParkings(ArrayList<Parking> parkings) {
+        this.parkings = parkings;
+    }
+
+    /**
+     * This method save a new POI to the database.
+     */
     public void writePoi(){
         DatabaseReference mDatabase;
 

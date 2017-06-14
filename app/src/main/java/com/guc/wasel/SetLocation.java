@@ -26,6 +26,9 @@ import java.util.Set;
 
 import static java.security.AccessController.getContext;
 
+/**
+ * This class defines the SetLocation Activity, this activity allows the user to select the location of a new POI
+ */
 public class SetLocation extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
@@ -81,6 +84,11 @@ public class SetLocation extends FragmentActivity implements OnMapReadyCallback 
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
+
+    /**
+     * This method define the behaviour of the map on user clicks.
+     * @param googleMap Google Maps Object
+     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -98,6 +106,10 @@ public class SetLocation extends FragmentActivity implements OnMapReadyCallback 
 
     }
 
+    /**
+     * This method build an alert dialog to confirm the locarion of the new POI
+     * @return AlertDialog Object
+     */
     private AlertDialog buildAlertDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(SetLocation.this);
         builder.setTitle("New Point of Intrest Confirmation");

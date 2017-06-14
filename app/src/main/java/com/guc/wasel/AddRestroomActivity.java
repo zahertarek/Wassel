@@ -1,9 +1,5 @@
 package com.guc.wasel;
 
-/**
- * Created by Zaher Abdelrahman on 4/21/2017.
- */
-
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
@@ -32,9 +28,9 @@ import java.util.ArrayList;
 import java.util.Map;
 
 /**
- * This Class defines the AddGateMapActivity, this activity is used to allow users to add gates to a specific point of interest, The user can define whether this gate is accessible or not
+ * This Class defines the AddRestroomMapActivity, this activity is used to allow users to add Restrooms to a specific point of interest, The user can define whether this Restroom is accessible or not
  */
-public class AddGateMapActivity extends AppCompatActivity implements OnMapReadyCallback,GoogleMap.OnInfoWindowClickListener{
+public class AddRestroomActivity extends AppCompatActivity implements OnMapReadyCallback,GoogleMap.OnInfoWindowClickListener{
 
     private GoogleMap mMap;
     private Marker marker;
@@ -43,22 +39,23 @@ public class AddGateMapActivity extends AppCompatActivity implements OnMapReadyC
     private String id;
     private double latitude;
     private double longitude;
-    ArrayList<Gate> gates;
+    ArrayList<Restroom> restrooms;
     private Switch isAccessibleSwitch;
     private AlertDialog alertDialog;
 
+
     /**
-     *This method is executed once the activity is created, to define the layout of the activity, declare the activity views
-     * Assign Views Listeners, defining the map fragment
+     *This method is executed once the activity is created, to define the layout of the activity, declare the activity views, assign Views Listeners, defining the map fragment
      * @param savedInstanceState
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_gate_map);
+        setContentView(R.layout.activity_add_restroom);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        id = (String) getIntent().getStringExtra("id");
 
         declareActivityViews();
 
@@ -79,7 +76,7 @@ public class AddGateMapActivity extends AppCompatActivity implements OnMapReadyC
 
 
 
-        loadGates();
+        loadRestrooms();
 
 
 
@@ -97,43 +94,43 @@ public class AddGateMapActivity extends AppCompatActivity implements OnMapReadyC
     }
 
     /**
-     * This function is called when a info window of a marker on the map is clicked, the gate referred by this marker is removed from the database
+     * This function is called when a info window of a marker on the map is clicked, the Restroom referred by this marker is removed from the database
      * @param marker the clicked marker object
      */
     @Override
     public void onInfoWindowClick(Marker marker) {
-        gates.remove(Integer.parseInt((String) marker.getTag()));
+        restrooms.remove(Integer.parseInt((String) marker.getTag()));
         marker.remove();
-        FirebaseDatabase.getInstance().getReference().child("poi").child(id).child("gates").setValue(gates);
+        FirebaseDatabase.getInstance().getReference().child("poi").child(id).child("restrooms").setValue(restrooms);
 
 
 
     }
 
     /**
-     * This method connect to the realtime database of Firebase and load all gates of the point of interest.
+     * This method connect to the realtime database of Firebase and load all Restrooms of the point of interest.
      */
-    public void loadGates(){
+    public void loadRestrooms(){
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("poi").child(id);
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Map poiEntry = (Map) dataSnapshot.getValue();
-                gates = (ArrayList) poiEntry.get("gates");
+                restrooms = (ArrayList) poiEntry.get("restrooms");
                 longitude = (double) poiEntry.get("longitude");
                 latitude = (double) poiEntry.get("latitude");
                 LatLng latLng = new LatLng(latitude,longitude);
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
                 marker.setPosition(latLng);
-                Marker markerGate = mMap.addMarker(new MarkerOptions().position(latLng).
+                Marker markerRestroom= mMap.addMarker(new MarkerOptions().position(latLng).
                         title((String) poiEntry.get("name")).
                         icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)));
-                if(gates != null)
-                    for(int i=0;i<gates.size();i++){
-                        Map gate =(Map) gates.get(i);
-                        double longitude =(double) gate.get("longitude");
-                        double latitude = (double) gate.get("latitude");
+                if(restrooms != null)
+                    for(int i=0;i<restrooms.size();i++){
+                        Map restroom =(Map) restrooms.get(i);
+                        double longitude =(double) restroom.get("longitude");
+                        double latitude = (double) restroom.get("latitude");
                         Marker m = mMap.addMarker(new MarkerOptions().position( new LatLng(latitude,longitude)).title("Tap Here to Remove").
                                 icon(BitmapDescriptorFactory.fromResource(R.drawable.exit)));
                         m.setTag(""+i);
@@ -149,27 +146,27 @@ public class AddGateMapActivity extends AppCompatActivity implements OnMapReadyC
     }
 
     /**
-     * Build and returns an alertdialog that asks the user if he is sure to add a new gate or not.
+     * Build and returns an alertdialog that asks the user if he is sure to add a new Restroom or not.
      * @return The Alert dialogue Built
      */
-    private  AlertDialog buildGateDialog(){
-        AlertDialog.Builder builder = new AlertDialog.Builder(AddGateMapActivity.this);
-        builder.setTitle("Gate Confirmation");
-        builder.setMessage("Are you sure you want to add a gate at this location");
-        builder.setPositiveButton("Add Gate", new DialogInterface.OnClickListener() {
+    private  AlertDialog buildRestroomDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(AddRestroomActivity.this);
+        builder.setTitle("Restroom Confirmation");
+        builder.setMessage("Are you sure you want to add a restroom at this location");
+        builder.setPositiveButton("Add Restroom", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 LatLng latLng = marker.getPosition();
-                Gate gate = new Gate();
-                gate.setAccessible(true);
-                gate.setLatitude(latLng.latitude);
-                gate.setLongitude(latLng.longitude);
-                gate.setAccessible(isAccessibleSwitch.isChecked());
-                if(gates == null){
-                    gates = new ArrayList<Gate>();
+                Restroom restroom = new Restroom();
+                restroom.setAccessible(true);
+                restroom.setLatitude(latLng.latitude);
+                restroom.setLongitude(latLng.longitude);
+                restroom.setAccessible(isAccessibleSwitch.isChecked());
+                if(restrooms == null){
+                    restrooms = new ArrayList<Restroom>();
                 }
-                gates.add(gate);
-                FirebaseDatabase.getInstance().getReference().child("poi").child(id).child("gates").setValue(gates);
+                restrooms.add(restroom);
+                FirebaseDatabase.getInstance().getReference().child("poi").child(id).child("restrooms").setValue(restrooms);
                 finish();
             }
         });
@@ -187,15 +184,14 @@ public class AddGateMapActivity extends AppCompatActivity implements OnMapReadyC
      * This method is responsible of declaring the views instant variables of this Activity to their corresponding view in the layout files, using findViewById() method.
      */
     private void declareActivityViews(){
-        id = (String) getIntent().getStringExtra("id");
-        button = (Button) findViewById(R.id.gate_location_submit);
-        abortButton = (Button) findViewById(R.id.gate_location_abort);
-        isAccessibleSwitch = (Switch) findViewById(R.id.gate_switch) ;
-        alertDialog = buildGateDialog();
+        button = (Button) findViewById(R.id.restroom_location_submit);
+        abortButton = (Button) findViewById(R.id.restroom_location_abort);
+        isAccessibleSwitch = (Switch) findViewById(R.id.restroom_switch) ;
+        alertDialog = buildRestroomDialog();
     }
 
     /**
-     * This function set the listeners of the Save and Abort Buttons, Save Button add a new gate, Abort Button close the Activity.
+     * This function set the listeners of the Save and Abort Buttons, Save Button add a new Restroom, Abort Button close the Activity.
      */
     private void setButtonListener(){
         button.setOnClickListener(new View.OnClickListener() {
@@ -208,7 +204,7 @@ public class AddGateMapActivity extends AppCompatActivity implements OnMapReadyC
         abortButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AddGateMapActivity.this.finish();
+                AddRestroomActivity.this.finish();
             }
         });
     }

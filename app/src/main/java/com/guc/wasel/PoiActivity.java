@@ -37,6 +37,9 @@ import com.ms.square.android.expandabletextview.ExpandableTextView;
 import java.util.ArrayList;
 import java.util.Map;
 
+/**
+ * This Class defines the POiActivity , that show the detailed info of a specific POI
+ */
 public class PoiActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private Poi poi;
@@ -80,15 +83,245 @@ public class PoiActivity extends AppCompatActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_poi);
-
-        verifyDialog = buildVerifyDialog();
-        deleteDialog = buildDeleteDialog();
-
-        editButton = (Button) findViewById(R.id.edit_btn);
-        deleteButton = (Button) findViewById(R.id.delete_btn);
-        verifyButton = (Button) findViewById(R.id.verify_btn);
+        declareActivityViews();
+        checkUserStatus();
+        initializeScrollView();
 
 
+
+
+        poi = (Poi) getIntent().getSerializableExtra("POI");
+        poiId = getIntent().getStringExtra("id");
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+        getSupportActionBar().setTitle(poi.getName());
+
+
+
+        setViewsValue();
+
+
+        checkIfAdmin();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadGates();
+        loadRestrooms();
+        loadParkings();
+    }
+
+    /**
+     * This method is responsible on showing google maps zoomed on the current POI, showing the gates, restroom, and parkings
+     * @param googleMap google maps object
+     */
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+
+        loadGates();
+        loadRestrooms();
+        loadParkings();
+
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mMap.clear();
+    }
+
+    /**
+     * This method connects to the database and load the gates of a specific POI
+     */
+    private void loadGates() {
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("poi").child(poiId);
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Map poiEntry = (Map) dataSnapshot.getValue();
+                if(poiEntry!=null){
+                    ArrayList gates = (ArrayList) poiEntry.get("gates");
+                    double longitude = (double) poiEntry.get("longitude");
+                    double latitude = (double) poiEntry.get("latitude");
+                    LatLng latLng = new LatLng(latitude, longitude);
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                    mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
+                    Marker marker = mMap.addMarker(new MarkerOptions().position(latLng).
+                            title((String) poiEntry.get("name")).
+                            icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)));
+                    if (gates != null)
+                        for (int i = 0; i < gates.size(); i++) {
+                            Map gate = (Map) gates.get(i);
+                            double longitude1 = (double) gate.get("longitude");
+                            double latitude1 = (double) gate.get("latitude");
+                            boolean isAccessible = (boolean) gate.get("accessible");
+                            String accessible = (isAccessible)?"Accessible Gate":"Not Accessible Gate";
+
+
+                            Marker m = mMap.addMarker(new MarkerOptions().position(new LatLng(latitude1, longitude1)).
+                                    icon(BitmapDescriptorFactory.fromResource(R.drawable.exit)).title(accessible));
+                        }
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    /**
+     * This method connects to the database and load the parkings of a specific POI
+     */
+    private void loadParkings() {
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("poi").child(poiId);
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Map poiEntry = (Map) dataSnapshot.getValue();
+                if(poiEntry!=null){
+                    ArrayList parkings = (ArrayList) poiEntry.get("parkings");
+                    double longitude = (double) poiEntry.get("longitude");
+                    double latitude = (double) poiEntry.get("latitude");
+                    LatLng latLng = new LatLng(latitude, longitude);
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                    mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
+                    Marker marker = mMap.addMarker(new MarkerOptions().position(latLng).
+                            title((String) poiEntry.get("name")).
+                            icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)));
+                    if (parkings != null)
+                        for (int i = 0; i < parkings.size(); i++) {
+                            Map parking = (Map) parkings.get(i);
+                            double longitude1 = (double) parking.get("longitude");
+                            double latitude1 = (double) parking.get("latitude");
+                            boolean isAccessible = (boolean) parking.get("accessible");
+                            String accessible = (isAccessible)?"Accessible Parking":"Not Accessible Parking";
+
+
+                            Marker m = mMap.addMarker(new MarkerOptions().position(new LatLng(latitude1, longitude1)).
+                                    icon(BitmapDescriptorFactory.fromResource(R.drawable.parking)).title(accessible));
+                        }
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    /**
+     * This method connects to the database and load the restrooms of a specific POI
+     */
+    private void loadRestrooms() {
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("poi").child(poiId);
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Map poiEntry = (Map) dataSnapshot.getValue();
+                if(poiEntry!=null){
+                    ArrayList restrooms = (ArrayList) poiEntry.get("restrooms");
+                    if (restrooms != null)
+                        for (int i = 0; i < restrooms.size(); i++) {
+                            Map restroom = (Map) restrooms.get(i);
+                            double longitude1 = (double) restroom.get("longitude");
+                            double latitude1 = (double) restroom.get("latitude");
+                            boolean isAccessible= (boolean) restroom.get("accessible");
+                            String accessible =(isAccessible)?"Accessible Restroom":"Not Accessible Restroom";
+                            Marker m = mMap.addMarker(new MarkerOptions().position(new LatLng(latitude1, longitude1)).
+                                    icon(BitmapDescriptorFactory.fromResource(R.drawable.restroom)).title(accessible));
+                        }
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    protected void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mAuth.removeAuthStateListener(mAuthListener);
+    }
+
+
+    /**
+     * This method builds an alert dialog to confirm on the user to verify a certain POI
+     * @return alertDialog
+     */
+    private AlertDialog buildVerifyDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(PoiActivity.this);
+        builder.setTitle("Confirm Verification");
+        builder.setMessage("Are you sure you want to verify this place");
+        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("poi").child(poiId);
+                poi.setVerified(true);
+                ref.setValue(poi);
+                finish();
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+    return builder.create();
+    }
+
+    /**
+     * This method builds an alert dialog to confirm on the user to delete a certain POI
+     * @return alertDialog
+     */
+    private AlertDialog buildDeleteDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(PoiActivity.this);
+        builder.setTitle("Delete");
+        builder.setMessage("This POI will be deleted permanently");
+        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("poi").child(poiId);
+                ref.setValue(null);
+                finish();
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        return builder.create();
+    }
+
+    /**
+     * This method check the current user status, and if he is an admin or normal user
+     */
+    private void checkUserStatus(){
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -104,52 +337,19 @@ public class PoiActivity extends AppCompatActivity implements OnMapReadyCallback
                 // ...
             }
         };
-
-        final ScrollView scrollView = (ScrollView) findViewById(R.id.scroll_view);
-        ImageView imageView = (ImageView) findViewById(R.id.transparent_image);
-
-        imageView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                int action = motionEvent.getAction();
-                switch (action) {
-                    case MotionEvent.ACTION_DOWN:
-                        // Disallow ScrollView to intercept touch events.
-                        scrollView.requestDisallowInterceptTouchEvent(true);
-                        // Disable touch on transparent view
-                        return false;
-
-                    case MotionEvent.ACTION_UP:
-                        // Allow ScrollView to intercept touch events.
-                        scrollView.requestDisallowInterceptTouchEvent(false);
-                        return true;
-
-                    case MotionEvent.ACTION_MOVE:
-                        scrollView.requestDisallowInterceptTouchEvent(true);
-                        return false;
-
-                    default:
-                        return true;
-                }
-            }
-
-        });
+    }
 
 
-        //  ExpandableTextView expTv1 = (ExpandableTextView) findViewById(R.id.expand_text_view);
+    /**
+     * This method is responsible of declaring the views instant variables of this Activity to their corresponding view in the layout files, using findViewById() method.
+     */
+    private void declareActivityViews(){
+        verifyDialog = buildVerifyDialog();
+        deleteDialog = buildDeleteDialog();
 
-// IMPORTANT - call setText on the ExpandableTextView to set the text content to display
-        //  expTv1.setText("!"+"\n"+"as");
-
-
-        poi = (Poi) getIntent().getSerializableExtra("POI");
-        poiId = getIntent().getStringExtra("id");
-
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
-        getSupportActionBar().setTitle(poi.getName());
+        editButton = (Button) findViewById(R.id.edit_btn);
+        deleteButton = (Button) findViewById(R.id.delete_btn);
+        verifyButton = (Button) findViewById(R.id.verify_btn);
 
         nameText = (TextView) findViewById(R.id.poi_name_text);
         accessibleParking = (TextView) findViewById(R.id.parking_text);
@@ -178,8 +378,9 @@ public class PoiActivity extends AppCompatActivity implements OnMapReadyCallback
         wheelChairRestroomsImg = (ImageView) findViewById(R.id.wheelchair_restrooms_img);
         wideDoorsImg = (ImageView) findViewById(R.id.wide_doors_img);
         inRoomAccessbilityImg = (ImageView) findViewById(R.id.in_room_img);
+    }
 
-
+    private void setViewsValue(){
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("poi").child(poiId);
         ref.addValueEventListener(new ValueEventListener() {
             @Override
@@ -247,6 +448,47 @@ public class PoiActivity extends AppCompatActivity implements OnMapReadyCallback
 
             }
         });
+    }
+
+    /**
+     * This method adjust the scrolling behaviour of the current activity
+     */
+    private void initializeScrollView(){
+        final ScrollView scrollView = (ScrollView) findViewById(R.id.scroll_view);
+        ImageView imageView = (ImageView) findViewById(R.id.transparent_image);
+
+        imageView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                int action = motionEvent.getAction();
+                switch (action) {
+                    case MotionEvent.ACTION_DOWN:
+                        // Disallow ScrollView to intercept touch events.
+                        scrollView.requestDisallowInterceptTouchEvent(true);
+                        // Disable touch on transparent view
+                        return false;
+
+                    case MotionEvent.ACTION_UP:
+                        // Allow ScrollView to intercept touch events.
+                        scrollView.requestDisallowInterceptTouchEvent(false);
+                        return true;
+
+                    case MotionEvent.ACTION_MOVE:
+                        scrollView.requestDisallowInterceptTouchEvent(true);
+                        return false;
+
+                    default:
+                        return true;
+                }
+            }
+
+        });
+    }
+
+    /**
+     * This methofd adjust the visibility of certain button based on the user status
+     */
+    private void checkIfAdmin(){
         if (MainActivity.isAdmin()) {
             editButton.setVisibility(View.VISIBLE);
             deleteButton.setVisibility(View.VISIBLE);
@@ -279,118 +521,5 @@ public class PoiActivity extends AppCompatActivity implements OnMapReadyCallback
                 deleteDialog.show();
             }
         });
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        loadGates();
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
-        loadGates();
-
-
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mMap.clear();
-    }
-
-    private void loadGates() {
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("poi").child(poiId);
-        ref.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Map poiEntry = (Map) dataSnapshot.getValue();
-                if(poiEntry!=null){
-                    ArrayList gates = (ArrayList) poiEntry.get("gates");
-                    double longitude = (double) poiEntry.get("longitude");
-                    double latitude = (double) poiEntry.get("latitude");
-                    LatLng latLng = new LatLng(latitude, longitude);
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                    mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
-                    Marker marker = mMap.addMarker(new MarkerOptions().position(latLng).
-                            title((String) poiEntry.get("name")).
-                            icon(BitmapDescriptorFactory.fromResource(R.drawable.icom)));
-                    if (gates != null)
-                        for (int i = 0; i < gates.size(); i++) {
-                            Map gate = (Map) gates.get(i);
-                            double longitude1 = (double) gate.get("longitude");
-                            double latitude1 = (double) gate.get("latitude");
-                            Marker m = mMap.addMarker(new MarkerOptions().position(new LatLng(latitude1, longitude1)).
-                                    icon(BitmapDescriptorFactory.fromResource(R.drawable.exit)));
-                        }
-                }
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    protected void onStart() {
-        super.onStart();
-        mAuth.addAuthStateListener(mAuthListener);
-    }
-
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        mAuth.removeAuthStateListener(mAuthListener);
-    }
-
-
-    private AlertDialog buildVerifyDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(PoiActivity.this);
-        builder.setTitle("Confirm Verification");
-        builder.setMessage("Are you sure you want to verify this place");
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("poi").child(poiId);
-                poi.setVerified(true);
-                ref.setValue(poi);
-                finish();
-            }
-        });
-
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.dismiss();
-            }
-        });
-    return builder.create();
-    }
-    private AlertDialog buildDeleteDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(PoiActivity.this);
-        builder.setTitle("Delete");
-        builder.setMessage("This POI will be deleted permanently");
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("poi").child(poiId);
-                ref.setValue(null);
-                finish();
-            }
-        });
-
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.dismiss();
-            }
-        });
-        return builder.create();
     }
 }
